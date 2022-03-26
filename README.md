@@ -21,3 +21,4 @@ You can create a free Infura/Alchemy account for node access, and generate a pri
 > Remember, private keys and node API keys are sensitive information, do not commit them to version control. Better yet use an [environment variable.](https://www.npmjs.com/package/dotenv) 
 
 4. Run this code using the command `node script.js`
+# interacting-smart-contracts
