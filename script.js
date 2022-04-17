@@ -2,6 +2,18 @@
 // const ethers = require("ethers");
 import ethers from 'ethers';
 import fetch from 'node-fetch';
+import async from 'async';
+import http from 'http';
+import fs from 'fs';
+import mysql from 'mysql';
+var connection = mysql.createConnection({
+    host     : 'localhost',
+    user     : 'me',
+    password : 'secret',
+    database : 'my_db'
+  });
+
+  connection.connect();
 
 async function main() {
 
@@ -36,12 +48,62 @@ async function main() {
     let totalSupply = await contract.totalSupply();
     console.log(totalSupply);
     let tokenURIs = [];
-    // for(let i=0;i<totalSupply;i++){
-    //     tokenURIs.push(contract.tokenURI(i))
+    for(let i=0;i<1000;i++){
+        tokenURIs.push(contract.tokenURI(i))
     //     tokenURIs[i].then((result)=>{console.log(result)})
-    // }
+    }
+    var errCount = 0;
+
+    function resolvePromise(tokenURI, callback){
+        tokenURI
+        .then((result)=>{callback(null, result)})
+        .catch((err)=>{errCount++; callback(err)})
+    }
+
+    // connection.query('SELECT 1 + 1 AS solution', function (error, results, fields) {
+    //     if (error) throw error;
+    //     console.log('The solution is: ', results[0].solution);
+    //   });
+
+    async.map(tokenURIs, resolvePromise)
+    .then( results => {
+        console.log(results);
+        fs.writeFile('/Users/kshitiz/interacting-smart-contracts/Output.txt', results, (err) => {
+            // In case of a error throw err.
+            if (err) console.log(err);
+        })
+        // results is now an array of the file size in bytes for each file, e.g.
+        // [ 1000, 2000, 3000]
+    }).catch( err => {
+        console.log(errCount);
+    });
+    console.log(errCount);
     console.log("===================================================================================");
+
+
+// your code
+
+// var requests = [];
+// // Build a large list of requests:
+// for (i=0;i<2;i++) {
+//     requests.push(function(callback){
+//         http.request({
+//            'method': 'GET',
+//            'hostname': 'ipfs.io',
+//            'path': 'ipfs/QmeSjSinHpPnmXmspMjwiXyN6zS4E9zccariGR3jxcaWtq/5'
+//         },function(res){
+//             callback(null,res);
+//         }).end()
+//     });
+// }
+
+// Make the requests, 100 at a time
+// async.parallelLimit(requests, 100,function(err, results){
+//     console.log(results);
+// });
+
 
 }
 
 main();
+connection.end();
